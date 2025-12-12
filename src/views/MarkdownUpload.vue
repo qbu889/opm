@@ -241,6 +241,8 @@
 <script>
 import { ref } from 'vue';
 import axios from 'axios';
+import bootstrap from 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default {
   name: 'MarkdownUpload',
@@ -298,10 +300,10 @@ export default {
             }
         );
 
-        // 创建下载链接 - 修复冗余变量警告
-        downloadUrl.value = window.URL.createObjectURL(new Blob([response.data], {
-          type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-        }));
+        // 创建下载链接
+        const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+        const url = window.URL.createObjectURL(blob);
+        downloadUrl.value = url;
       } catch (error) {
         uploadError.value = error.response?.data?.error || '上传失败，请重试';
       } finally {
@@ -323,15 +325,9 @@ export default {
     // 打开关键词管理模态框
     const openKeywordsManager = () => {
       if (!managerModalInstance.value) {
-        // 动态导入bootstrap以避免引用警告
-        import('bootstrap/dist/js/bootstrap.bundle.min.js').then(bootstrapModule => {
-          const bootstrap = bootstrapModule.default || bootstrapModule;
-          managerModalInstance.value = new bootstrap.Modal(keywordsManagerModal.value);
-          managerModalInstance.value.show();
-        });
-      } else {
-        managerModalInstance.value.show();
+        managerModalInstance.value = new bootstrap.Modal(keywordsManagerModal.value);
       }
+      managerModalInstance.value.show();
       // 打开时自动加载关键词
       loadKeywords();
     };
@@ -357,15 +353,9 @@ export default {
       // 再打开添加/编辑模态框
       setTimeout(() => {
         if (!modalInstance.value) {
-          // 动态导入bootstrap
-          import('bootstrap/dist/js/bootstrap.bundle.min.js').then(bootstrapModule => {
-            const bootstrap = bootstrapModule.default || bootstrapModule;
-            modalInstance.value = new bootstrap.Modal(keywordModal.value);
-            modalInstance.value.show();
-          });
-        } else {
-          modalInstance.value.show();
+          modalInstance.value = new bootstrap.Modal(keywordModal.value);
         }
+        modalInstance.value.show();
       }, 100);
     };
 
@@ -383,15 +373,9 @@ export default {
       // 再打开编辑模态框
       setTimeout(() => {
         if (!modalInstance.value) {
-          // 动态导入bootstrap
-          import('bootstrap/dist/js/bootstrap.bundle.min.js').then(bootstrapModule => {
-            const bootstrap = bootstrapModule.default || bootstrapModule;
-            modalInstance.value = new bootstrap.Modal(keywordModal.value);
-            modalInstance.value.show();
-          });
-        } else {
-          modalInstance.value.show();
+          modalInstance.value = new bootstrap.Modal(keywordModal.value);
         }
+        modalInstance.value.show();
       }, 100);
     };
 
@@ -483,56 +467,32 @@ export default {
 };
 </script>
 
-
 <style scoped>
-.markdown-upload-container {
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.page-title {
-  color: #0d6efd;
-  margin-bottom: 30px;
-  text-align: center;
-}
-
-.card {
-  margin-bottom: 30px;
-  border-radius: 8px;
-  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-}
-
-.upload-card .card-body {
-  padding: 30px;
-}
-
-.keywords-management-section {
-  text-align: center;
-  margin: 30px 0;
-}
-
-.keywords-management-section .btn {
-  padding: 12px 24px;
-  font-size: 1.1rem;
-}
-
+/* 关键词管理弹窗优化 */
 .keywords-manager-container {
-  padding: 15px;
+  padding: 10px;
 }
 
 .manager-actions {
   display: flex;
-  justify-content: center;
-  gap: 10px;
+  justify-content: flex-start;
+  gap: 8px;
   flex-wrap: wrap;
+  margin-bottom: 15px;
+  padding: 0 5px;
 }
 
 .keyword-list-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 30px;
-  margin-top: 20px;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+@media (max-width: 992px) {
+  .keyword-list-grid {
+    gap: 15px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -541,24 +501,25 @@ export default {
   }
 
   .manager-actions {
-    flex-direction: column;
-    align-items: center;
+    justify-content: center;
   }
 }
 
 .column-title {
-  margin-bottom: 20px;
-  font-size: 1.1rem;
-  text-align: center;
+  margin-bottom: 15px;
+  font-size: 1rem;
+  text-align: left;
+  padding: 0 5px;
+  color: #495057;
 }
 
 .keywords-container {
-  min-height: 200px;
-  max-height: 400px;
+  min-height: 150px;
+  max-height: none; /* 移除最大高度限制 */
   overflow-y: auto;
-  padding: 10px;
+  padding: 8px;
   border: 1px solid #dee2e6;
-  border-radius: 6px;
+  border-radius: 4px;
   background-color: #f8f9fa;
 }
 
@@ -566,30 +527,32 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 15px;
+  padding: 8px 10px;
   border: 1px solid #dee2e6;
-  margin-bottom: 10px;
-  border-radius: 6px;
+  margin-bottom: 6px;
+  border-radius: 4px;
   background-color: white;
   transition: all 0.2s ease-in-out;
+  font-size: 0.9rem;
 }
 
 .keyword-item:hover {
   background-color: #e9ecef;
   border-color: #adb5bd;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
 
 .keyword-text {
   flex: 1;
   word-break: break-all;
-  padding-right: 10px;
+  padding-right: 8px;
+  font-size: 0.95rem;
 }
 
 .keyword-actions {
   display: flex;
-  gap: 5px;
+  gap: 4px;
   flex-shrink: 0;
 }
 
@@ -597,50 +560,46 @@ export default {
   background-color: #17a2b8;
   color: white;
   border: 1px solid #17a2b8;
-  padding: 4px 10px;
-  font-size: 0.8rem;
+  padding: 3px 8px;
+  font-size: 0.75rem;
 }
 
 .btn-delete {
   background-color: #dc3545;
   color: white;
   border: 1px solid #dc3545;
-  padding: 4px 10px;
-  font-size: 0.8rem;
+  padding: 3px 8px;
+  font-size: 0.75rem;
 }
 
 .no-keywords {
   text-align: center;
   color: #6c757d;
-  padding: 40px 20px;
+  padding: 30px 10px;
   font-style: italic;
+  font-size: 0.9rem;
 }
 
-.modal-title {
-  font-weight: 600;
-}
-
-.input-group {
-  display: flex;
-  gap: 10px;
-}
-
-.alert {
-  border-radius: 6px;
-}
-
-.btn-success {
-  background-color: #28a745;
-  border-color: #28a745;
-}
-
+/* 模态框优化 */
 .modal-xl {
-  max-width: 90%;
+  max-width: 95%;
 }
 
-.modal-dialog {
-  display: flex;
-  align-items: center;
-  min-height: calc(100% - 1rem);
+.modal-content {
+  max-height: 90vh;
+  overflow: hidden;
 }
+
+.modal-body {
+  max-height: calc(90vh - 120px);
+  overflow-y: auto;
+}
+
+@media (min-width: 992px) {
+  .modal-xl {
+    max-width: 80%;
+  }
+}
+
 </style>
+
